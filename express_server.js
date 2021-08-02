@@ -15,7 +15,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.urls[this.shortURL] };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase.urls[req.params.shortURL] };
   res.render("urls_show", templateVars);
 });
 
