@@ -22,7 +22,6 @@ const generateRandomString = () => {
   return randomString;
 };
 
-
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
@@ -43,24 +42,12 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  // console.log(req.body);  // Log the POST request body to the console
+  // Log the POST request body to the console
   const newKey = generateRandomString();
   urlDatabase[`${newKey}`] = req.body.longURL;
-  // console.log("urlDatabase: ", urlDatabase);
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  // Redirect to newly generated key
+  res.redirect(`/urls/${newKey}`);
 });
-
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
