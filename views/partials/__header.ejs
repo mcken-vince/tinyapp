@@ -9,14 +9,14 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-      <div class="navbar-nav text-right" id="loginForm" style="margin-right: 1em">
-        <form class="form-inline" method="POST" action="/login">
-          <div class="form-group mb-2">
+      <div class="navbar-nav" id="loginForm" style="right:0%" >
+        <div class="form-group mb-2"></div>
+          <form class="form-inline" method="POST" action="/login">
             <h4 class="" style="padding-left: 1em; padding-right: 1em"><%= username %></h4>
             <input class="form-control" type="text" name="username" placeholder="Username" style="width: 300px;">
             <button type="submit" class="btn btn-outline-dark">Login</button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   </nav>
