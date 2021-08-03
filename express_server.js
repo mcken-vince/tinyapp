@@ -38,6 +38,16 @@ const generateRandomString = () => {
   return randomString;
 };
 
+// search through emails in database, return user if condition callback returns true
+const emailSearch = (condition) => {
+  for (const user in users) {
+    if (condition(users[user].email)) {
+      return user;
+    }
+  }
+  return false
+};
+
 // if user is logged in, redirect to /urls, otherwise redirect to login page
 app.get("/", (req, res) => {
   if (users[req.cookies.user_id]) {
@@ -133,12 +143,28 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const emailExists = false;
+  // check if email already exists in user database
+
+
+  if (!email || !password) {
+    res.statusCode = 400;
+    res.send("StatusCode 400 (Error): invalid email or password");
+    return;
+  } 
+  if (emailSearch((e)=> e === email)){
+    res.statusCode = 400;
+    res.send("StatusCode 400 (Error): That email already exists in our database.")
+  } 
+  
+
   const id = generateRandomString();
   users[id] = { id: id, email: email, password: password, urls: {} };
   console.log("users[id]", users[id]);
   // set cookie
   res.cookie('user_id', id);
   res.redirect("/urls");
+
 });
 
 app.listen(PORT, () => {
