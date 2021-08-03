@@ -6,7 +6,7 @@ app.set("view engine", "ejs");
 
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({extended: true}), cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -50,15 +50,22 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newKey}`);
 });
 
+// sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
+// change longURL for existing shortURL
 app.post("/urls/:shortURL", (req, res) => {
-  console.log(`${urlDatabase[req.params.shortURL]} changed to ${req.body.longURL}`)
+  // console.log(`${urlDatabase[req.params.shortURL]} changed to ${req.body.longURL}`)
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
+});
+
+// sent here by login button
+app.post("/login", (req, res) => {
+  console.log(cookieParser);
 });
 
 app.listen(PORT, () => {
