@@ -10,8 +10,8 @@ const bodyParser = require('body-parser');
 app.use(morgan('dev'), cookieParser(), bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  // "b2xVn2": "http://www.lighthouselabs.ca",
+  // "9sm5xK": "http://www.google.com"
 };
 
 const generateRandomString = () => {
@@ -24,15 +24,27 @@ const generateRandomString = () => {
   return randomString;
 };
 
+// if user is logged in, redirect to /urls, otherwise redirect to login page
+app.get("/", (req, res) => {
+  if (req.cookies.username) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
+});
+
+/// displays list of all urls
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, username: req.cookies.username };
   res.render("urls_index", templateVars);
 });
 
+// page to create new tiny url
 app.get("/urls/new", (req, res) => {
   res.render("urls_new", req.cookies);
 });
 
+// direct to page displaying specific shortURL, if it doesn't exist
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies.username };
   res.render("urls_show", templateVars);
@@ -41,6 +53,16 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = { username: req.cookies.username };
+  res.render("register", templateVars);
+});
+
+// redirect here if invalid request
+app.get("/invalid-request", (req, res) => {
+  // create template to render here
 });
 
 app.post("/urls", (req, res) => {
