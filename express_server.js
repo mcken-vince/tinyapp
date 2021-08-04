@@ -61,7 +61,6 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   console.log(req.cookies.user_id)
   const templateVars = users[req.cookies.user_id];
-  console.log("templateVars inside app.get/urls", templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -97,9 +96,8 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-// redirect here if invalid request
-app.get("/invalid-request", (req, res) => {
-  // create template to render here
+app.get("/login", (req, res) => {
+  res.render("login");
 });
 
 app.post("/urls", (req, res) => {
@@ -130,14 +128,20 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // sent here by login button
 app.post("/login", (req, res) => {
-  res.cookie('user_id', req.body.username);
-  
-  res.redirect("/urls");
+  const user = users[emailSearch(e => e === req.body.email)];
+  console.log(user);
+  if (user && user.password === req.body.password) {
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
+
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect("/register");
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {
