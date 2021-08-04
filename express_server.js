@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 app.use(morgan('dev'), cookieParser(), bodyParser.urlencoded({extended: true}));
 
-// User Format
+// User Format for reference
 // "userRandomID": {
 //   user_id: "userRandomID", 
 //   email: "user@example.com", 
@@ -23,10 +23,11 @@ const users = {
 
 };
 
-const urlDatabase = {
-  // "b2xVn2": "http://www.lighthouselabs.ca",
-  // "9sm5xK": "http://www.google.com"
-};
+// delete this?
+// const urlDatabase = {
+//   // "b2xVn2": "http://www.lighthouselabs.ca",
+//   // "9sm5xK": "http://www.google.com"
+// };
 
 const generateRandomString = () => {
   const length = 6;
@@ -47,6 +48,7 @@ const emailSearch = (condition) => {
   }
   return false
 };
+
 
 // if user is logged in, redirect to /urls, otherwise redirect to login page
 app.get("/", (req, res) => {
