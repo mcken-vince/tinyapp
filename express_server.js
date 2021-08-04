@@ -26,11 +26,10 @@ const users = {
 
 };
 
-// delete this?
-// const urlDatabase = {
-//   // "b2xVn2": "http://www.lighthouselabs.ca",
-//   // "9sm5xK": "http://www.google.com"
-// };
+// stores all urls created by tinyApp
+const urlDatabase = [
+
+];
 
 const generateRandomString = () => {
   const length = 6;
@@ -42,7 +41,7 @@ const generateRandomString = () => {
   return randomString;
 };
 
-// search through emails in database, return user if condition callback returns true
+// search through user[property] in users object, return user if condition callback returns true
 const propSearch = (property, condition) => {
   for (const user in users) {
     if (condition(users[user][property])) {
@@ -52,6 +51,14 @@ const propSearch = (property, condition) => {
   return false
 };
 
+const urlSearch = (url) => {
+  for (const u in urlDatabase) {
+    if (urlDatabase[u].shortURL === url) {
+      return u;
+    }
+  }
+  return false;
+};
 
 // if user is logged in, redirect to /urls, otherwise redirect to login page
 app.get("/", (req, res) => {
@@ -71,7 +78,13 @@ app.get("/urls", (req, res) => {
 
 // page to create new tiny url
 app.get("/urls/new", (req, res) => {
-  if (propSearch(user_id, i => i === req.cookies.user_id)) {
+
+  if (!req.cookies.user_id) {
+    res.statusCode = 403;
+    res.send('StatusCode 403: You must sign in to create a new url with TinyApp');
+  }
+  
+  if (propSearch('user_id', i => i === req.cookies.user_id)) {
     res.render("urls_new", users[req.cookies.user_id]);
     return;
   }
@@ -102,8 +115,14 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = users[req.cookies.user_id].urls[req.params.shortURL];
-  res.redirect(longURL);
+  const url = urlSearch(req.params.shortURL)
+  if (url) {
+    const longURL = urlDatabase[url].longURL;
+    res.redirect(longURL);
+  } else {
+    res.statusCode = 404;
+    res.send("Sorry, faulty link.");
+  }
 });
 
 app.get("/register", (req, res) => {
@@ -116,9 +135,11 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.cookies.user_id) {
+  if (propSearch('user_id', i => i === req.cookies.user_id)) {
     res.redirect("/urls");
   }
+  // reset cookie just in case
+  res.cookie('user_id', "");
   // provide user_id for compatibility with __header.ejs
   res.render("login", { user_id: "" });
 });
@@ -128,16 +149,20 @@ app.post("/urls", (req, res) => {
   const user_id = req.cookies.user_id;
   if (users[user_id]) {
   users[user_id].urls[newKey] = req.body.longURL;
+
+  // add new URL to urlDatabase, so that anyone can use the links
+  urlDatabase.push({ user_id, shortURL: newKey, longURL: req.body.longURL })
   // Redirect to newly generated key
   res.redirect(`/urls/${newKey}`);
-  } else {
-    console.log("users[id] is undefined");
   }
 });
 
 // sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete users[req.cookies.user_id].urls[req.params.shortURL];
+  const url = urlSearch(req.params.shortURL);
+  urlDatabase.splice(url, 1);
+
   res.redirect("/urls");
 });
 
@@ -145,6 +170,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   console.log(`${req.params.shortURL} changed to ${req.body.longURL}`)
   users[req.cookies.user_id].urls[req.params.shortURL] = req.body.longURL;
+  
+  const index = urlSearch(req.params.shortURL);
+  urlDatabase[index].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
