@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
+const { generateRandomString, propSearch, urlSearch } = require('./helpers');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -18,15 +19,6 @@ app.use(cookieSession({
 }));
 app.use(bodyParser.urlencoded({extended: true}));
 
-// User Format for reference
-// "userRandomID": {
-//   user_id: "userRandomID", 
-//   email: "user@example.com", 
-//   password: "purple-monkey-dinosaur"
-//   urls: {"b2xVn2": "http://www.lighthouselabs.ca",
-//          "9sm5xK": "http://www.google.com",
-//   }
-// },
 
 const users = {
 
@@ -36,37 +28,6 @@ const users = {
 const urlDatabase = [
 
 ];
-
-const generateRandomString = () => {
-  const length = 6;
-  let randomString = '';
-  const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  for (let x = 1; x <= length; x++) {
-    randomString += characters[Math.floor(Math.random() * characters.length)];
-  }
-  return randomString;
-};
-
-// search through user[property] in users object, return user if condition callback returns true
-const propSearch = (property, condition) => {
-  for (const user in users) {
-    if (condition(users[user][property])) {
-      return user;
-    }
-  }
-  return false
-};
-
-// return index of url in urlDatabase
-const urlSearch = (url) => {
-  for (const u in urlDatabase) {
-    if (urlDatabase[u].shortURL === url) {
-      return u;
-    }
-  }
-  return false;
-};
-
 
 // if user is logged in, redirect to /urls, otherwise redirect to login page
 app.get("/", (req, res) => {
@@ -86,7 +47,7 @@ app.get("/urls", (req, res) => {
 
 // page to create new tiny url
 app.get("/urls/new", (req, res) => {
-  if (propSearch('user_id', i => i === req.session.user_id)) {
+  if (propSearch('user_id', i => i === req.session.user_id, users)) {
     res.render("urls_new", users[req.session.user_id]);
     return;
   }
@@ -117,7 +78,8 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const url = urlSearch(req.params.shortURL)
+  const url = urlSearch(req.params.shortURL, urlDatabase);
+  console.log("url:", url);
   if (url) {
     const longURL = urlDatabase[url].longURL;
     res.redirect(longURL);
@@ -136,7 +98,7 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (propSearch('user_id', i => i === req.session.user_id)) {
+  if (propSearch('user_id', i => i === req.session.user_id, users)) {
     res.redirect("/urls");
   }
   // reset cookie just in case
@@ -174,14 +136,14 @@ app.post("/urls/:shortURL", (req, res) => {
   users[req.session.user_id].urls[req.params.shortURL] = req.body.longURL;
   
   // change value in urlDatabase
-  const index = urlSearch(req.params.shortURL);
+  const index = urlSearch(req.params.shortURL, urlDatabase);
   urlDatabase[index].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
 // sent here by login button
 app.post("/login", (req, res) => {
-  const user = users[propSearch('email', e => e === req.body.email)];
+  const user = users[propSearch('email', e => e === req.body.email, users)];
   console.log("user when POST /login: ", user);
   // correct passsword and email
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
@@ -210,7 +172,7 @@ app.post("/register", (req, res) => {
     return;
   } 
   // check if email already exists in database
-  if (propSearch('email', (e)=> e === email)) {
+  if (propSearch('email', (e)=> e === email, users)) {
     res.statusCode = 400;
     res.render("400", { errorMessage: "That email already exists in our database." });
     return;
