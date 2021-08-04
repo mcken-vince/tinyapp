@@ -43,9 +43,9 @@ const generateRandomString = () => {
 };
 
 // search through emails in database, return user if condition callback returns true
-const emailSearch = (condition) => {
+const propSearch = (property, condition) => {
   for (const user in users) {
-    if (condition(users[user].email)) {
+    if (condition(users[user][property])) {
       return user;
     }
   }
@@ -71,7 +71,12 @@ app.get("/urls", (req, res) => {
 
 // page to create new tiny url
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new", users[req.cookies.user_id]);
+  if (propSearch(user_id, i => i === req.cookies.user_id)) {
+    res.render("urls_new", users[req.cookies.user_id]);
+    return;
+  }
+
+  res.redirect("/login");
 });
 
 // direct to page displaying specific shortURL, if it doesn't exist
@@ -102,10 +107,19 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.render("register", {user_id: "" });
+  if (req.cookies.user_id) {
+    res.redirect("/urls");
+    return;
+  }
+  // provide user_id for compatibility with __header.ejs
+  res.render("register", { user_id: "" });
 });
 
 app.get("/login", (req, res) => {
+  if (req.cookies.user_id) {
+    res.redirect("/urls");
+  }
+  // provide user_id for compatibility with __header.ejs
   res.render("login", { user_id: "" });
 });
 
@@ -136,7 +150,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 // sent here by login button
 app.post("/login", (req, res) => {
-  const user = users[emailSearch(e => e === req.body.email)];
+  const user = users[propSearch('email', e => e === req.body.email)];
   console.log(user);
   // correct passsword and email
   if (user && user.password === req.body.password) {
@@ -166,7 +180,7 @@ app.post("/register", (req, res) => {
     return;
   } 
   // check if email already exists in database
-  if (emailSearch((e)=> e === email)){
+  if (propSearch('email', (e)=> e === email)){
     res.statusCode = 400;
     res.send("StatusCode 400 (Error): That email already exists in our database.")
     return;
