@@ -39,6 +39,7 @@ app.get("/urls", (req, res) => {
   let templateVars;
   if (users[req.session.user_id]) {
     templateVars = users[req.session.user_id];
+    // how to access 'created' value when displaying all of user's urls
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/login");
@@ -61,8 +62,10 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL, 
     longURL: users[req.session.user_id].urls[req.params.shortURL], 
     email: users[req.session.user_id].email, 
-    user_id: req.session.user_id };
-  
+    user_id: req.session.user_id,
+    created: urlDatabase[urlSearch(req.params.shortURL, urlDatabase)].created,
+  }
+
   let hasURL = false;
   for (let url in users[req.session.user_id].urls) {
     if (url === req.params.shortURL) {
@@ -112,9 +115,9 @@ app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
   if (users[user_id]) {
   users[user_id].urls[newKey] = req.body.longURL;
-
+  const created = new Date();
   // add new URL to urlDatabase, so that anyone can use the links
-  urlDatabase.push({ user_id, shortURL: newKey, longURL: req.body.longURL })
+  urlDatabase.push({ user_id, created, shortURL: newKey, longURL: req.body.longURL})
   // Redirect to newly generated key
   res.redirect(`/urls/${newKey}`);
   }
