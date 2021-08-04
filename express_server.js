@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -178,7 +179,7 @@ app.post("/login", (req, res) => {
   const user = users[propSearch('email', e => e === req.body.email)];
   console.log(user);
   // correct passsword and email
-  if (user && user.password === req.body.password) {
+  if (user && bcrypt.compareSync(req.body.password, user.password)) {
     res.cookie('user_id', user.user_id);
     res.redirect("/urls");
   } else {
@@ -195,7 +196,7 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, 10);
   
   // blank fields will not be tolerated
   if (!email || !password) {
