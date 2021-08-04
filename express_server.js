@@ -1,12 +1,12 @@
 const express = require('express');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set('view engine', 'ejs');
 
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
 
 app.use(morgan('dev'));
 app.use(cookieParser());
@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 //   password: "purple-monkey-dinosaur"
 //   urls: {"b2xVn2": "http://www.lighthouselabs.ca",
 //          "9sm5xK": "http://www.google.com",
-// },
+//   }
 // },
 
 const users = {
@@ -51,6 +51,7 @@ const propSearch = (property, condition) => {
   return false
 };
 
+// return index of url in urlDatabase
 const urlSearch = (url) => {
   for (const u in urlDatabase) {
     if (urlDatabase[u].shortURL === url) {
@@ -59,6 +60,7 @@ const urlSearch = (url) => {
   }
   return false;
 };
+
 
 // if user is logged in, redirect to /urls, otherwise redirect to login page
 app.get("/", (req, res) => {
@@ -78,12 +80,6 @@ app.get("/urls", (req, res) => {
 
 // page to create new tiny url
 app.get("/urls/new", (req, res) => {
-
-  if (!req.cookies.user_id) {
-    res.statusCode = 403;
-    res.send('StatusCode 403: You must sign in to create a new url with TinyApp');
-  }
-  
   if (propSearch('user_id', i => i === req.cookies.user_id)) {
     res.render("urls_new", users[req.cookies.user_id]);
     return;
@@ -120,8 +116,7 @@ app.get("/u/:shortURL", (req, res) => {
     const longURL = urlDatabase[url].longURL;
     res.redirect(longURL);
   } else {
-    res.statusCode = 404;
-    res.send("Sorry, faulty link.");
+    res.render("404", { errorMessage: "Sorry, faulty link. Resource may have been deleted by user." });
   }
 });
 
@@ -169,8 +164,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // edit url
 app.post("/urls/:shortURL", (req, res) => {
   console.log(`${req.params.shortURL} changed to ${req.body.longURL}`)
+  // change value in user.urls
   users[req.cookies.user_id].urls[req.params.shortURL] = req.body.longURL;
   
+  // change value in urlDatabase
   const index = urlSearch(req.params.shortURL);
   urlDatabase[index].longURL = req.body.longURL;
   res.redirect("/urls");
@@ -186,8 +183,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     // wrong password or email
-    res.statusCode = 403;
-    res.send("StatusCode 403 (Error): Incorrect email or password");
+    res.render("403", { errorMessage: "Incorrect email or password" });
     return;
   }
 });
@@ -204,13 +200,13 @@ app.post("/register", (req, res) => {
   // blank fields will not be tolerated
   if (!email || !password) {
     res.statusCode = 400;
-    res.send("StatusCode 400 (Error): invalid email or password");
+    res.render("400", { errorMessage: "Invalid email or password" });
     return;
   } 
   // check if email already exists in database
-  if (propSearch('email', (e)=> e === email)){
+  if (propSearch('email', (e)=> e === email)) {
     res.statusCode = 400;
-    res.send("StatusCode 400 (Error): That email already exists in our database.")
+    res.render("400", { errorMessage: "That email already exists in our database." });
     return;
   } 
   // if all is well, create new user
