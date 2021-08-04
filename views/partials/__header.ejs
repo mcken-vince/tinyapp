@@ -11,9 +11,18 @@
           <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
         </div>
       </div>
-      <div class="navbar-nav m3e-auto">
+      <div class="navbar-nav me-auto">
+        
+        <% if (user_id) { %>
+          <h4 class="" style="padding-left: 1em; padding-right: 1em">Logged In As: <%= email %></h4>
+          <form method="POST" action="/logout">
+          <button type="submit" class="btn btn-outline-dark">Logout</button>
+          </form>
+        <% } else { %>
+          
         <a class="nav-item nav-link" href="/login">Sign In</a>
         <a class="nav-item nav-link" href="/register">Register</a>
+        <% } %>
       </div>
     </div>
   </nav>
