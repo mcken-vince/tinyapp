@@ -8,26 +8,25 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-  <title>Register</title>
+  <title>Create Account</title>
 </head>
 <body>
   <%- include('partials/__header') %>
-  
+
   <div class="container" style="margin: 2em;">
-    <h4>Registration Form:</h3>
+    <h3><b>Create Account</b></h3>
     <form method="POST" action="/register">
-        <div class="row">
+          <h5 style="margin-top: 1em">Email address</h5>
           <input class="form-control" style="max-width: 20em" type="email" name="email" placeholder="email">
-        </div>
-        <div class="row">
+          <h5 style="margin-top: 1em">Password</h5>
           <input class="form-control" style="max-width: 20em" type="password" name="password" placeholder="password">
         
-          <button type="submit" class="btn btn-secondary" style="margin-left:1em">Submit</button>
-      </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:1em">Submit</button>
+
     </form>
   </div>
   <div class="container" style="margin:2em">
-    <h4>Already have an account? Sign in <a href="/login">here</a>.</h4>
+    <h5>Already have an account? Sign in <a href="/login">here</a>.</h5>
   </div>
 </body>
 </html>

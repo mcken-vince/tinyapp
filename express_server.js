@@ -119,7 +119,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
-// change longURL for existing shortURL
+// edit url
 app.post("/urls/:shortURL", (req, res) => {
   console.log(`${req.params.shortURL} changed to ${req.body.longURL}`)
   users[req.cookies.user_id].urls[req.params.shortURL] = req.body.longURL;
@@ -130,13 +130,16 @@ app.post("/urls/:shortURL", (req, res) => {
 app.post("/login", (req, res) => {
   const user = users[emailSearch(e => e === req.body.email)];
   console.log(user);
+  // correct passsword and email
   if (user && user.password === req.body.password) {
     res.cookie('user_id', user.id);
     res.redirect("/urls");
   } else {
-    res.redirect("/login");
+    // wrong password or email
+    res.statusCode = 403;
+    res.send("StatusCode 403 (Error): Incorrect email or password");
+    return;
   }
-
 });
 
 app.post("/logout", (req, res) => {
@@ -147,25 +150,24 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const emailExists = false;
-  // check if email already exists in user database
-
-
+  
+  // blank fields will not be tolerated
   if (!email || !password) {
     res.statusCode = 400;
     res.send("StatusCode 400 (Error): invalid email or password");
     return;
   } 
+  // check if email already exists in database
   if (emailSearch((e)=> e === email)){
     res.statusCode = 400;
     res.send("StatusCode 400 (Error): That email already exists in our database.")
+    return;
   } 
-  
-
+  // if all is well, create new user
   const id = generateRandomString();
   users[id] = { id: id, email: email, password: password, urls: {} };
   console.log("users[id]", users[id]);
-  // set cookie
+  // set cookie and send them on their merry way
   res.cookie('user_id', id);
   res.redirect("/urls");
 
