@@ -24,7 +24,7 @@ const users = {
 
 };
 
-// stores all urls created by tinyApp
+// stores all urls created with tinyApp
 const urlDatabase = [
 
 ];
@@ -62,6 +62,11 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const url = urlDatabase[urlSearch(shortURL, urlDatabase)];
   console.log("url:", url);
+  if (!url) {
+    res.render("404", { errorMessage: "Invalid URL, page not found."});
+    return;
+  }
+
   if (url.user_id === req.session.user_id) {
     const templateVars = { 
       shortURL: url.shortURL,
@@ -90,7 +95,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (req.session.user_id) {
+  if (propSearch('user_id', id => id === req.session.user_id, users)) {
     res.redirect("/urls");
     return;
   }
@@ -99,7 +104,7 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (propSearch('user_id', i => i === req.session.user_id, users)) {
+  if (propSearch('user_id', id => id === req.session.user_id, users)) {
     res.redirect("/urls");
   }
   // reset cookie just in case
@@ -112,7 +117,6 @@ app.post("/urls", (req, res) => {
   const newKey = generateRandomString();
   const user_id = req.session.user_id;
   if (users[user_id]) {
-  users[user_id].urls[newKey] = req.body.longURL;
   const created = new Date();
   // add new URL to urlDatabase, so that anyone can use the links
   urlDatabase.push({ user_id, created, shortURL: newKey, longURL: req.body.longURL})
@@ -123,7 +127,6 @@ app.post("/urls", (req, res) => {
 
 // sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete users[req.session.user_id].urls[req.params.shortURL];
   const url = urlSearch(req.params.shortURL);
   urlDatabase.splice(url, 1);
 
@@ -132,7 +135,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // edit url
 app.post("/urls/:shortURL", (req, res) => {
-  console.log(`${req.params.shortURL} changed to ${req.body.longURL}`)
+  console.log(`${req.params.shortURL} changed to ${req.body.longURL}`);
   // change value in user.urls
   users[req.session.user_id].urls[req.params.shortURL] = req.body.longURL;
   
