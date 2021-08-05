@@ -61,13 +61,9 @@ app.get("/urls/:shortURL", (req, res) => {
   }
   // check if this url was created by current user
   if (url.userId === req.session.userId) {
-    const templateVars = {
-      shortURL: url.shortURL,
-      longURL: url.longURL,
-      email: users[req.session.userId].email,
-      userId: req.session.userId,
-      created: url.created,
-    };
+    const templateVars = url;
+    templateVars.email = users[url.userId].email;
+ 
     res.render("urls_show", templateVars);
     return;
   }
@@ -78,13 +74,17 @@ app.get("/urls/:shortURL", (req, res) => {
 // link to longURL
 app.get("/u/:shortURL", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
+
   if (url) {
     const longURL = urlDatabase[url].longURL;
+    urlDatabase[url].totalVisits += 1;
     res.redirect(longURL);
   } else {
     res.render("404", { errorMessage: "Inconceivable! Resource may have been deleted by user." });
   }
 });
+
+
 
 // register page
 app.get("/register", (req, res) => {
@@ -115,7 +115,7 @@ app.post("/urls", (req, res) => {
   if (users[userId]) {
     const created = new Date();
     // add new URL to urlDatabase, so that anyone can use the links
-    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL});
+    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL, totalVisits: 0 });
     // Redirect to newly generated url
     res.redirect(`/urls/${newKey}`);
   } else {
