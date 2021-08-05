@@ -27,7 +27,7 @@
           <tr>
             <td><%= url.shortURL %></td>
             <td><%= url.longURL %></td>
-            <td><%= url.created %></td>
+            <td><%= url.created.toDateString() %></td>
             <td><%= url.totalVisits %></td>
             <td><form method="GET" action="/urls/<%= url.shortURL %>"><button type="submit" class="btn btn-outline-primary">Edit</button></form></td>
             <td><form method="POST" action="/urls/<%= url.shortURL %>?_method=DELETE"><button type="submit" class="btn btn-outline-danger">Delete</button></form></td>
