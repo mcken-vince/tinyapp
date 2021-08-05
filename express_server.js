@@ -122,22 +122,27 @@ app.post("/urls", (req, res) => {
 
 // sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const url = getIndexOfUrl(req.params.shortURL);
-  console.log("deleting this url: ", urlDatabase[url]);
-  urlDatabase.splice(url, 1);
+  const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
+  if (urlDatabase[url].user_id === req.session.user_id) {
+    urlDatabase.splice(url, 1);
+    res.redirect("/urls");
+  } else {
+    res.render("400", { errorMessage: "Who do you think you are? You can't delete that URL!" });
+  }
 
-  res.redirect("/urls");
 });
 
 // edit button on urls_index
 app.post("/urls/:shortURL", (req, res) => {
-  // change value in user.urls
-  users[req.session.user_id].urls[req.params.shortURL] = req.body.longURL;
-  
-  // change value in urlDatabase
-  const index = getIndexOfUrl(req.params.shortURL, urlDatabase);
-  urlDatabase[index].longURL = req.body.longURL;
-  res.redirect("/urls");
+  const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
+  if (url && urlDatabase[url].user_id === req.session.user_id) {
+    // if everything checks out, change value in urlDatabase
+    const index = getIndexOfUrl(req.params.shortURL, urlDatabase);
+    urlDatabase[index].longURL = req.body.longURL;
+    res.redirect("/urls");
+  } else {
+    res.render("400", { errorMessage: "You can't modify that URL, it doesn't belong to you!" });
+  }
 });
 
 // login submission
