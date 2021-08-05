@@ -11,7 +11,7 @@ const PORT = 8080; // default port 8080
 app.set('view engine', 'ejs');
 app.set('trust proxy', 1);
 
-app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(methodOverride('_method'));
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
@@ -124,7 +124,7 @@ app.post("/urls", (req, res) => {
 });
 
 // sent here by delete buttons on urls_index
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
   if (urlDatabase[url].userId === req.session.userId) {
     urlDatabase.splice(url, 1);
@@ -136,7 +136,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 // edit button on urls_index
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
   if (url && urlDatabase[url].userId === req.session.userId) {
     // if everything checks out, change value in urlDatabase
