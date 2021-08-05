@@ -60,7 +60,7 @@ app.get("/urls/new", (req, res) => {
 // direct to page displaying specific shortURL, if it doesn't exist
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const url = urlSearch(shortURL, urlDatabase);
+  const url = urlDatabase[urlSearch(shortURL, urlDatabase)];
   console.log("url:", url);
   if (url.user_id === req.session.user_id) {
     const templateVars = { 

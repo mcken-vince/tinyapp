@@ -61,11 +61,5 @@ const myUrls = (user_id, urlDatabase) => {
   return myList;
 };
 
-const urlDatabase = [{user_id: 'abc', url: 'this is mine'}, {user_id: 'gjs', url: 'not mine'}, {user_id: 'abc', url: 'also mine'}, {user_id:'ald', url: 'also not mine'}];
-const user_id = 'abc';
-const output = myUrls(user_id, urlDatabase);
-console.log(output);
-
-
 
 module.exports = { generateRandomString, propSearch, urlSearch, myUrls };
