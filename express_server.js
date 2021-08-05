@@ -41,7 +41,7 @@ app.get("/urls", (req, res) => {
     templateVars.urls = getMyUrls(req.session.user_id, urlDatabase);
     res.render("urls_index", templateVars);
   } else {
-    res.redirect("/login");
+    res.render("403", { errorMessage: "You must sign in to access this page." });
   }
 });
 
