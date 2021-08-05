@@ -18,6 +18,7 @@ Users must sign in to create short URL links, and can edit at any time when sign
 - bcrypt
 - body-parser
 - cookie-session
+- method-override
 
 ## Getting Started
 
