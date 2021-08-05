@@ -75,15 +75,22 @@ app.get("/u/:shortURL", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
 
   if (url) {
-    const longURL = urlDatabase[url].longURL;
-    urlDatabase[url].totalVisits += 1;
+    const thisURL = urlDatabase[url];
+    const longURL = thisURL.longURL;
+    thisURL.totalVisits += 1;
+    // if this click is a new visitor
+    if (!thisURL.uniqueVisitors.includes(req.session.visitor)) {
+      const newVisitor = generateRandomString();
+      req.session.visitor = newVisitor;
+      thisURL.uniqueVisitors.push(newVisitor);
+      thisURL.uniqueClicks += 1;
+    }
+
     res.redirect(longURL);
   } else {
     res.send("Inconceivable! Resource may have been deleted by user.").sendStatus(404);
   }
 });
-
-
 
 // register page
 app.get("/register", (req, res) => {
@@ -114,7 +121,7 @@ app.post("/urls", (req, res) => {
   if (users[userId]) {
     const created = new Date();
     // add new URL to urlDatabase, so that anyone can use the links
-    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL, totalVisits: 0 });
+    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL, totalVisits: 0, uniqueVisitors: [], uniqueClicks: 0 });
     // Redirect to newly generated url
     res.redirect(`/urls/${newKey}`);
   } else {
