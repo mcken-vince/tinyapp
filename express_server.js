@@ -32,9 +32,9 @@ app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-/// displays all of the user's created urls
 app.get("/urls", (req, res) => {
   let templateVars;
+  // only accessible if user is signed in
   if (users[req.session.userId]) {
     templateVars = users[req.session.userId];
     templateVars.urls = getMyUrls(req.session.userId, urlDatabase);
