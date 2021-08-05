@@ -46,15 +46,15 @@ const getIndexOfUrl = (url, urlDatabase) => {
 
 
 /**
- * Finds all urls corresponding to given user_id
- * @param {*string } user_id 
+ * Finds all urls corresponding to given userId
+ * @param {*string } userId 
  * @param {*array of objects } urlDatabase 
  * @returns an array populated with all of the url objects created by that user
  */
-const getMyUrls = (user_id, urlDatabase) => {
+const getMyUrls = (userId, urlDatabase) => {
   const myList = [];
   urlDatabase.map(url => {
-    if (url.user_id === user_id) {
+    if (url.userId === userId) {
       myList.push(url);
     }
   }); 

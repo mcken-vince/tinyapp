@@ -36,18 +36,18 @@ app.get("/", (req, res) => {
 /// displays all of the user's created urls
 app.get("/urls", (req, res) => {
   let templateVars;
-  if (users[req.session.user_id]) {
-    templateVars = users[req.session.user_id];
-    templateVars.urls = getMyUrls(req.session.user_id, urlDatabase);
+  if (users[req.session.userId]) {
+    templateVars = users[req.session.userId];
+    templateVars.urls = getMyUrls(req.session.userId, urlDatabase);
     res.render("urls_index", templateVars);
-  } else {
-    res.render("403", { errorMessage: "You must sign in to access this page." });
+    return;
   }
+  res.render("403", { errorMessage: "You must sign in to access this page." });
 });
 
 app.get("/urls/new", (req, res) => {
-  if (getUserByProp(req.session.user_id, 'user_id', users)) {
-    res.render("urls_new", users[req.session.user_id]);
+  if (getUserByProp(req.session.userId, 'userId', users)) {
+    res.render("urls_new", users[req.session.userId]);
     return;
   }
   res.redirect("/login");
@@ -56,74 +56,78 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const url = urlDatabase[getIndexOfUrl(shortURL, urlDatabase)];
-  console.log("url:", url);
   if (!url) {
     res.render("404", { errorMessage: "Invalid URL, page not found."});
     return;
   }
   // check if this url was created by current user
-  if (url.user_id === req.session.user_id) {
-    const templateVars = { 
+  if (url.userId === req.session.userId) {
+    const templateVars = {
       shortURL: url.shortURL,
-      longURL: url.longURL, 
-      email: users[req.session.user_id].email, 
-      user_id: req.session.user_id,
+      longURL: url.longURL,
+      email: users[req.session.userId].email,
+      userId: req.session.userId,
       created: url.created,
-      // add more stretch properties here
-    }
+    };
     res.render("urls_show", templateVars);
-  } else {
-    res.render("403", { errorMessage: "You must sign in to view your urls." });
+    return;
   }
+
+  res.render("403", { errorMessage: "You must sign in to view your urls." });
 });
 
+// link to longURL
 app.get("/u/:shortURL", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
-  console.log("url:", url);
   if (url) {
     const longURL = urlDatabase[url].longURL;
     res.redirect(longURL);
   } else {
-    res.render("404", { errorMessage: "Sorry, faulty link. Resource may have been deleted by user." });
+    res.render("404", { errorMessage: "Inconceivable! Resource may have been deleted by user." });
   }
 });
 
+// register page
 app.get("/register", (req, res) => {
-  if (getUserByProp(req.session.user_id, 'user_id', users)) {
+  if (getUserByProp(req.session.userId, 'userId', users)) {
     res.redirect("/urls");
     return;
   }
-  // provide user_id for compatibility with __header.ejs
-  res.render("register", { user_id: "" });
+  // providing userId for compatibility with __header.ejs
+  res.render("register", { userId: "" });
 });
 
+// login page
 app.get("/login", (req, res) => {
-  if (getUserByProp(req.session.user_id, 'user_id', users)) {
+  if (getUserByProp(req.session.userId, 'userId', users)) {
     res.redirect("/urls");
+    return;
   }
-  // reset cookie just in case
+  // reset cookies just in case
   req.session = null;
-  // provide user_id for compatibility with __header.ejs
-  res.render("login", { user_id: "" });
+  // provide userId for compatibility with __header.ejs
+  res.render("login", { userId: "" });
 });
 
 // create new url submission
 app.post("/urls", (req, res) => {
   const newKey = generateRandomString();
-  const user_id = req.session.user_id;
-  if (users[user_id]) {
-  const created = new Date();
-  // add new URL to urlDatabase, so that anyone can use the links
-  urlDatabase.push({ user_id, created, shortURL: newKey, longURL: req.body.longURL})
-  // Redirect to newly generated key
-  res.redirect(`/urls/${newKey}`);
+  const userId = req.session.userId;
+  if (users[userId]) {
+    const created = new Date();
+    // add new URL to urlDatabase, so that anyone can use the links
+    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL});
+    // Redirect to newly generated url
+    res.redirect(`/urls/${newKey}`);
+  } else {
+    res.render("400", { errorMessage: "What are you doing? You can't do that." });
   }
 });
 
 // sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
-  if (urlDatabase[url].user_id === req.session.user_id) {
+  if (urlDatabase[url].userId === req.session.userId) {
     urlDatabase.splice(url, 1);
     res.redirect("/urls");
   } else {
@@ -135,7 +139,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // edit button on urls_index
 app.post("/urls/:shortURL", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
-  if (url && urlDatabase[url].user_id === req.session.user_id) {
+  if (url && urlDatabase[url].userId === req.session.userId) {
     // if everything checks out, change value in urlDatabase
     const index = getIndexOfUrl(req.params.shortURL, urlDatabase);
     urlDatabase[index].longURL = req.body.longURL;
@@ -148,10 +152,9 @@ app.post("/urls/:shortURL", (req, res) => {
 // login submission
 app.post("/login", (req, res) => {
   const user = users[getUserByProp(req.body.email, 'email', users)];
-  console.log("user when POST /login: ", user);
   // correct passsword and email
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
-    req.session.user_id = user.user_id;
+    req.session.userId = user.userId;
     res.redirect("/urls");
   } else {
     // wrong password or email
@@ -170,25 +173,23 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
-  
-  // blank fields will not be tolerated
+  // blank fields in registration form will not be tolerated
   if (!email || !password) {
     res.statusCode = 400;
     res.render("400", { errorMessage: "Invalid email or password" });
     return;
-  } 
-  // check if email already exists in database
+  }
+  // check if email exists in database
   if (getUserByProp(email, 'email', users)) {
     res.statusCode = 400;
     res.render("400", { errorMessage: "That email already exists in our database." });
     return;
-  } 
+  }
   // if all is well, create new user
-  const user_id = generateRandomString();
-  users[user_id] = { user_id, email, password, urls: {} };
-  console.log("users[user_id]", users[user_id]);
+  const userId = generateRandomString();
+  users[userId] = { userId, email, password, urls: {} };
   // set cookie and send them on their merry way
-  req.session.user_id = user_id;
+  req.session.userId = userId;
   res.redirect("/urls");
 
 });

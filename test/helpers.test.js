@@ -30,29 +30,29 @@ describe('#getUserByProp', () => {
 describe('#getIndexOfUrl', () => {
   it ('should return index of url if shortURL property matches', () => {
     const shortURL = 'abc123';
-    const urlDatabase = [{user_id:'1', shortURL: 'gjr385'}, {user_id: '17', shortURL: 'ekv482'}, {user_id: '58', shortURL: 'abc123'}, {user_id: '1', shortURL: 'env271'}];
+    const urlDatabase = [{userId:'1', shortURL: 'gjr385'}, {userId: '17', shortURL: 'ekv482'}, {userId: '58', shortURL: 'abc123'}, {userId: '1', shortURL: 'env271'}];
     const result = getIndexOfUrl(shortURL, urlDatabase);
     assert.equal(result, 2);
   });
   it ('should return false if url is not in database', () => {
     const shortURL = 'not000';
-    const urlDatabase = [{user_id:'1', shortURL: 'gjr385'}, {user_id: '17', shortURL: 'ekv482'}, {user_id: '58', shortURL: 'abc123'}, {user_id: '1', shortURL: 'env271'}];
+    const urlDatabase = [{userId:'1', shortURL: 'gjr385'}, {userId: '17', shortURL: 'ekv482'}, {userId: '58', shortURL: 'abc123'}, {userId: '1', shortURL: 'env271'}];
     const result = getIndexOfUrl(shortURL, urlDatabase);
     assert.isFalse(result);
   });
 });
 
 describe('#getMyUrls', () => {
-  it ('should return a list of urls whose user_id property matches the given user_id', () => {
-    const urlDatabase = [{user_id: 'abc', url: 'this is mine'}, {user_id: 'gjs', url: 'not mine'}, {user_id: 'abc', url: 'also mine'}, {user_id:'ald', url: 'also not mine'}];
-    const user_id = 'abc';
-    const result = getMyUrls(user_id, urlDatabase);
-    assert.deepEqual(result, [{user_id: 'abc', url: 'this is mine'}, {user_id: 'abc', url: 'also mine'}]);
+  it ('should return a list of urls whose userId property matches the given userId', () => {
+    const urlDatabase = [{userId: 'abc', url: 'this is mine'}, {userId: 'gjs', url: 'not mine'}, {userId: 'abc', url: 'also mine'}, {userId:'ald', url: 'also not mine'}];
+    const userId = 'abc';
+    const result = getMyUrls(userId, urlDatabase);
+    assert.deepEqual(result, [{userId: 'abc', url: 'this is mine'}, {userId: 'abc', url: 'also mine'}]);
   });
-  it ('should return an empty list if no urls match user_id', () => {
-    const urlDatabase = [{user_id: 'abc', url: 'this is mine'}, {user_id: 'gjs', url: 'not mine'}, {user_id: 'abc', url: 'also mine'}, {user_id:'ald', url: 'also not mine'}];
-    const user_id = 'xyz';
-    const result = getMyUrls(user_id, urlDatabase);
+  it ('should return an empty list if no urls match userId', () => {
+    const urlDatabase = [{userId: 'abc', url: 'this is mine'}, {userId: 'gjs', url: 'not mine'}, {userId: 'abc', url: 'also mine'}, {userId:'ald', url: 'also not mine'}];
+    const userId = 'xyz';
+    const result = getMyUrls(userId, urlDatabase);
     assert.deepEqual(result, []);
   });
 });
