@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const { generateRandomString, propSearch, getIndexOfUrl, getMyUrls } = require('../helpers');
+const { generateRandomString, getUserByProp, getIndexOfUrl, getMyUrls } = require('../helpers');
 
 describe('#generateRandomString', () => {
   it('should generate a string 6 characters long', () => {
@@ -9,20 +9,20 @@ describe('#generateRandomString', () => {
   });
 });
 
-describe('#propSearch', () => {
+describe('#getUserByProp', () => {
   it ("should return correct user when given user's email", () => {
     const property = 'email';
-    const condition = e => e === 'bob@mob.cob';
+    const value = 'bob@mob.cob';
     const database = {user1:{username: 'joey', email: 'jo@mo.co'}, user2:{username: 'christina', email: 'chris@miss.hiss'}, user3:{username: 'bobster', email: 'bob@mob.cob'}};
-    const result = propSearch(property, condition, database);
+    const result = getUserByProp(value, property, database);
     assert.deepEqual(result, 'user3');
   });
   
   it ('should return false if condition is not met for any user', () => {
     const property = 'email';
-    const condition = e => e === 'jim@bim.shmim';
+    const value = 'jim@bim.shmim';
     const database = {user1:{username: 'joey', email: 'jo@mo.co'}, user2:{username: 'christina', email: 'chris@miss.hiss'}, user3:{username: 'bobster', email: 'bob@mob.cob'}};
-    const result = propSearch(property, condition, database);
+    const result = getUserByProp(value, property, database);
     assert.isFalse(result);
   });
 });

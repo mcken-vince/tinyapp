@@ -15,14 +15,14 @@ const generateRandomString = () => {
 
 /**
  * 
- * @param { *string property of objects in database }  property 
- * @param { *function that returns true/false } condition 
- * @param { *object of objects }  database
+ * @param { *value:string  } value 
+ * @param { *property:string }  property 
+ * @param { *database: object of objects }  database
  * @returns user object if condition(database[property]) returns true. Otherwise returns false
  */
-const propSearch = (property, condition, database) => {
+const getUserByProp = (value, property, database) => {
   for (const user in database) {
-    if (condition(database[user][property])) {
+    if (database[user][property] === value) {
       return user;
     }
   }
@@ -62,4 +62,4 @@ const getMyUrls = (user_id, urlDatabase) => {
 };
 
 
-module.exports = { generateRandomString, propSearch, getIndexOfUrl, getMyUrls };
+module.exports = { generateRandomString, getUserByProp, getIndexOfUrl, getMyUrls };

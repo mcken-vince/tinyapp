@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
-const { generateRandomString, propSearch, getIndexOfUrl, getMyUrls } = require('./helpers');
+const { generateRandomString, getUserByProp, getIndexOfUrl, getMyUrls } = require('./helpers');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -29,15 +29,13 @@ const urlDatabase = [
 
 ];
 
-// if user is logged in, redirect to /urls, otherwise redirect to login page
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
 
-/// displays list of all urls
+/// displays all of the user's created urls
 app.get("/urls", (req, res) => {
   let templateVars;
-  
   if (users[req.session.user_id]) {
     templateVars = users[req.session.user_id];
     templateVars.urls = getMyUrls(req.session.user_id, urlDatabase);
@@ -47,17 +45,14 @@ app.get("/urls", (req, res) => {
   }
 });
 
-// page to create new tiny url
 app.get("/urls/new", (req, res) => {
-  if (propSearch('user_id', i => i === req.session.user_id, users)) {
+  if (getUserByProp(req.session.user_id, 'user_id', users)) {
     res.render("urls_new", users[req.session.user_id]);
     return;
   }
-
   res.redirect("/login");
 });
 
-// direct to page displaying specific shortURL, if it doesn't exist
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const url = urlDatabase[getIndexOfUrl(shortURL, urlDatabase)];
@@ -66,7 +61,7 @@ app.get("/urls/:shortURL", (req, res) => {
     res.render("404", { errorMessage: "Invalid URL, page not found."});
     return;
   }
-
+  // check if this url was created by current user
   if (url.user_id === req.session.user_id) {
     const templateVars = { 
       shortURL: url.shortURL,
@@ -74,9 +69,8 @@ app.get("/urls/:shortURL", (req, res) => {
       email: users[req.session.user_id].email, 
       user_id: req.session.user_id,
       created: url.created,
-
+      // add more stretch properties here
     }
-
     res.render("urls_show", templateVars);
   } else {
     res.render("403", { errorMessage: "You must sign in to view your urls." });
@@ -95,7 +89,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (propSearch('user_id', id => id === req.session.user_id, users)) {
+  if (getUserByProp(req.session.user_id, 'user_id', users)) {
     res.redirect("/urls");
     return;
   }
@@ -104,7 +98,7 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (propSearch('user_id', id => id === req.session.user_id, users)) {
+  if (getUserByProp(req.session.user_id, 'user_id', users)) {
     res.redirect("/urls");
   }
   // reset cookie just in case
@@ -113,6 +107,7 @@ app.get("/login", (req, res) => {
   res.render("login", { user_id: "" });
 });
 
+// create new url submission
 app.post("/urls", (req, res) => {
   const newKey = generateRandomString();
   const user_id = req.session.user_id;
@@ -128,14 +123,14 @@ app.post("/urls", (req, res) => {
 // sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
   const url = getIndexOfUrl(req.params.shortURL);
+  console.log("deleting this url: ", urlDatabase[url]);
   urlDatabase.splice(url, 1);
 
   res.redirect("/urls");
 });
 
-// edit url
+// edit button on urls_index
 app.post("/urls/:shortURL", (req, res) => {
-  console.log(`${req.params.shortURL} changed to ${req.body.longURL}`);
   // change value in user.urls
   users[req.session.user_id].urls[req.params.shortURL] = req.body.longURL;
   
@@ -145,9 +140,9 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-// sent here by login button
+// login submission
 app.post("/login", (req, res) => {
-  const user = users[propSearch('email', e => e === req.body.email, users)];
+  const user = users[getUserByProp(req.body.email, 'email', users)];
   console.log("user when POST /login: ", user);
   // correct passsword and email
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
@@ -160,11 +155,13 @@ app.post("/login", (req, res) => {
   }
 });
 
+// logout button
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");
 });
 
+// register submission
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
@@ -176,7 +173,7 @@ app.post("/register", (req, res) => {
     return;
   } 
   // check if email already exists in database
-  if (propSearch('email', (e)=> e === email, users)) {
+  if (getUserByProp(email, 'email', users)) {
     res.statusCode = 400;
     res.render("400", { errorMessage: "That email already exists in our database." });
     return;
