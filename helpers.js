@@ -44,4 +44,21 @@ const urlSearch = (url, urlDatabase) => {
   return false;
 };
 
-module.exports = { generateRandomString, propSearch, urlSearch };
+
+/**
+ * 
+ * @param {*string } user_id 
+ * @param {*array of objects} urlDatabase 
+ * @returns an array populated with all of the url objects created by that user
+ */
+const myUrls = (user_id, urlDatabase) => {
+  const myList = [];
+  for (url of urlDatabase) {
+    if (url.user_id === user_id) {
+      myList.push(url);
+    }
+  }
+  return myList;
+};
+
+module.exports = { generateRandomString, propSearch, urlSearch, myUrls };

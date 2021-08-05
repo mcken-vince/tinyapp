@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
-const { generateRandomString, propSearch, urlSearch } = require('./helpers');
+const { generateRandomString, propSearch, urlSearch, myUrls } = require('./helpers');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -37,9 +37,10 @@ app.get("/", (req, res) => {
 /// displays list of all urls
 app.get("/urls", (req, res) => {
   let templateVars;
+  
   if (users[req.session.user_id]) {
     templateVars = users[req.session.user_id];
-    // how to access 'created' value when displaying all of user's urls
+    templateVars.urls = myUrls(req.session.user_id, urlDatabase);
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/login");
