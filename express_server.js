@@ -8,8 +8,6 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 app.set('view engine', 'ejs');
-
-// relates to cookie-session
 app.set('trust proxy', 1);
 
 app.use(morgan('dev'));
@@ -18,7 +16,6 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 app.use(bodyParser.urlencoded({extended: true}));
-
 
 const users = {
 
@@ -191,7 +188,6 @@ app.post("/register", (req, res) => {
   // set cookie and send them on their merry way
   req.session.userId = userId;
   res.redirect("/urls");
-
 });
 
 app.listen(PORT, () => {
