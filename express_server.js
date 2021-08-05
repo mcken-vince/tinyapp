@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
 const { generateRandomString, getUserByProp, getIndexOfUrl, getMyUrls } = require('./helpers');
 const bcrypt = require('bcrypt');
 const app = express();
@@ -10,6 +11,7 @@ const PORT = 8080; // default port 8080
 app.set('view engine', 'ejs');
 app.set('trust proxy', 1);
 
+app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
