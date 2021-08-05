@@ -41,7 +41,7 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
     return;
   }
-  res.render("403", { errorMessage: "You must sign in to access this page." });
+  res.send("You must sign in to access this page.").sendStatus(403);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -56,7 +56,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const url = urlDatabase[getIndexOfUrl(shortURL, urlDatabase)];
   if (!url) {
-    res.render("404", { errorMessage: "Invalid URL, page not found."});
+    res.send("Invalid URL, page not found.").sendStatus(404);
     return;
   }
   // check if this url was created by current user
@@ -67,8 +67,7 @@ app.get("/urls/:shortURL", (req, res) => {
     res.render("urls_show", templateVars);
     return;
   }
-
-  res.render("403", { errorMessage: "You must sign in to view your urls." });
+  res.send("You must sign in to view your urls.").sendStatus(403);
 });
 
 // link to longURL
@@ -80,7 +79,7 @@ app.get("/u/:shortURL", (req, res) => {
     urlDatabase[url].totalVisits += 1;
     res.redirect(longURL);
   } else {
-    res.render("404", { errorMessage: "Inconceivable! Resource may have been deleted by user." });
+    res.send("Inconceivable! Resource may have been deleted by user.").sendStatus(404);
   }
 });
 
@@ -119,7 +118,7 @@ app.post("/urls", (req, res) => {
     // Redirect to newly generated url
     res.redirect(`/urls/${newKey}`);
   } else {
-    res.render("400", { errorMessage: "What are you doing? You can't do that." });
+    res.send("What are you doing? You can't do that.").sendStatus(400);
   }
 });
 
@@ -130,7 +129,7 @@ app.delete("/urls/:shortURL", (req, res) => {
     urlDatabase.splice(url, 1);
     res.redirect("/urls");
   } else {
-    res.render("400", { errorMessage: "Who do you think you are? You can't delete that URL!" });
+    res.send("Who do you think you are? You can't delete that URL!").sendStatus(400);
   }
 
 });
@@ -144,7 +143,7 @@ app.put("/urls/:shortURL", (req, res) => {
     urlDatabase[index].longURL = req.body.longURL;
     res.redirect("/urls");
   } else {
-    res.render("400", { errorMessage: "You can't modify that URL, it doesn't belong to you!" });
+    res.send("You can't modify that URL, it doesn't belong to you!").sendStatus(400);
   }
 });
 
@@ -157,8 +156,7 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     // wrong password or email
-    res.render("403", { errorMessage: "Incorrect email or password" });
-    return;
+    res.send("Incorrect email or password.").sendStatus(403);
   }
 });
 
@@ -174,14 +172,12 @@ app.post("/register", (req, res) => {
   const password = bcrypt.hashSync(req.body.password, 10);
   // blank fields in registration form will not be tolerated
   if (!email || !password) {
-    res.statusCode = 400;
-    res.render("400", { errorMessage: "Invalid email or password" });
+    res.send("Invalid email or password.").sendStatus(400);
     return;
   }
   // check if email exists in database
   if (getUserByProp(email, 'email', users)) {
-    res.statusCode = 400;
-    res.render("400", { errorMessage: "That email already exists in our database." });
+    res.send("That email already exists in our database.").sendStatus(400);
     return;
   }
   // if all is well, create new user
