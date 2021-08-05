@@ -13,7 +13,7 @@ app.set('trust proxy', 1);
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
-  keys: ['key1', 'key2']
+  keys: ['this-a-key', 'that-a-key']
 }));
 app.use(bodyParser.urlencoded({extended: true}));
 
