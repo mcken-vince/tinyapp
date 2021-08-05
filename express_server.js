@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
-const { generateRandomString, propSearch, urlSearch, myUrls } = require('./helpers');
+const { generateRandomString, propSearch, getIndexOfUrl, getMyUrls } = require('./helpers');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -40,7 +40,7 @@ app.get("/urls", (req, res) => {
   
   if (users[req.session.user_id]) {
     templateVars = users[req.session.user_id];
-    templateVars.urls = myUrls(req.session.user_id, urlDatabase);
+    templateVars.urls = getMyUrls(req.session.user_id, urlDatabase);
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/login");
@@ -60,7 +60,7 @@ app.get("/urls/new", (req, res) => {
 // direct to page displaying specific shortURL, if it doesn't exist
 app.get("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const url = urlDatabase[urlSearch(shortURL, urlDatabase)];
+  const url = urlDatabase[getIndexOfUrl(shortURL, urlDatabase)];
   console.log("url:", url);
   if (!url) {
     res.render("404", { errorMessage: "Invalid URL, page not found."});
@@ -84,7 +84,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const url = urlSearch(req.params.shortURL, urlDatabase);
+  const url = getIndexOfUrl(req.params.shortURL, urlDatabase);
   console.log("url:", url);
   if (url) {
     const longURL = urlDatabase[url].longURL;
@@ -127,7 +127,7 @@ app.post("/urls", (req, res) => {
 
 // sent here by delete buttons on urls_index
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const url = urlSearch(req.params.shortURL);
+  const url = getIndexOfUrl(req.params.shortURL);
   urlDatabase.splice(url, 1);
 
   res.redirect("/urls");
@@ -140,7 +140,7 @@ app.post("/urls/:shortURL", (req, res) => {
   users[req.session.user_id].urls[req.params.shortURL] = req.body.longURL;
   
   // change value in urlDatabase
-  const index = urlSearch(req.params.shortURL, urlDatabase);
+  const index = getIndexOfUrl(req.params.shortURL, urlDatabase);
   urlDatabase[index].longURL = req.body.longURL;
   res.redirect("/urls");
 });

@@ -35,7 +35,7 @@ const propSearch = (property, condition, database) => {
  * @param {*array of objects} urlDatabase 
  * @returns object from urlDatabase if object.shortURL === url. Otherwise returns false.
  */
-const urlSearch = (url, urlDatabase) => {
+const getIndexOfUrl = (url, urlDatabase) => {
   for (const u in urlDatabase) {
     if (urlDatabase[u].shortURL === url) {
       return u;
@@ -51,7 +51,7 @@ const urlSearch = (url, urlDatabase) => {
  * @param {*array of objects } urlDatabase 
  * @returns an array populated with all of the url objects created by that user
  */
-const myUrls = (user_id, urlDatabase) => {
+const getMyUrls = (user_id, urlDatabase) => {
   const myList = [];
   urlDatabase.map(url => {
     if (url.user_id === user_id) {
@@ -62,4 +62,4 @@ const myUrls = (user_id, urlDatabase) => {
 };
 
 
-module.exports = { generateRandomString, propSearch, urlSearch, myUrls };
+module.exports = { generateRandomString, propSearch, getIndexOfUrl, getMyUrls };
