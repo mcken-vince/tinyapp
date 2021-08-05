@@ -59,25 +59,22 @@ app.get("/urls/new", (req, res) => {
 
 // direct to page displaying specific shortURL, if it doesn't exist
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { 
-    shortURL: req.params.shortURL, 
-    longURL: users[req.session.user_id].urls[req.params.shortURL], 
-    email: users[req.session.user_id].email, 
-    user_id: req.session.user_id,
-    created: urlDatabase[urlSearch(req.params.shortURL, urlDatabase)].created,
-  }
+  const shortURL = req.params.shortURL;
+  const url = urlSearch(shortURL, urlDatabase);
+  console.log("url:", url);
+  if (url.user_id === req.session.user_id) {
+    const templateVars = { 
+      shortURL: url.shortURL,
+      longURL: url.longURL, 
+      email: users[req.session.user_id].email, 
+      user_id: req.session.user_id,
+      created: url.created,
 
-  let hasURL = false;
-  for (let url in users[req.session.user_id].urls) {
-    if (url === req.params.shortURL) {
-      hasURL = true;
     }
-  }
 
-  if (hasURL) {
     res.render("urls_show", templateVars);
   } else {
-    res.redirect("/urls");
+    res.render("403", { errorMessage: "You must sign in to view your urls." });
   }
 });
 

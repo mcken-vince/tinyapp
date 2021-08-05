@@ -48,17 +48,24 @@ const urlSearch = (url, urlDatabase) => {
 /**
  * 
  * @param {*string } user_id 
- * @param {*array of objects} urlDatabase 
+ * @param {*array of objects } urlDatabase 
  * @returns an array populated with all of the url objects created by that user
  */
 const myUrls = (user_id, urlDatabase) => {
   const myList = [];
-  for (url of urlDatabase) {
+  urlDatabase.map(url => {
     if (url.user_id === user_id) {
       myList.push(url);
     }
-  }
+  }); 
   return myList;
 };
+
+const urlDatabase = [{user_id: 'abc', url: 'this is mine'}, {user_id: 'gjs', url: 'not mine'}, {user_id: 'abc', url: 'also mine'}, {user_id:'ald', url: 'also not mine'}];
+const user_id = 'abc';
+const output = myUrls(user_id, urlDatabase);
+console.log(output);
+
+
 
 module.exports = { generateRandomString, propSearch, urlSearch, myUrls };
