@@ -6,9 +6,11 @@ Users must sign in to create short URL links, and can edit at any time when sign
 
 ## Final Product
 
-!["screenshot description"](#)
+!["Screenshot of URLs page"](https://github.com/mcken-vince/tinyapp/blob/master/docs/urls-page.png)
 
-!["screenshot description"](#)
+!["Screenshot of URL edit page"](https://github.com/mcken-vince/tinyapp/blob/master/docs/url-edit-page.png)
+
+!["Screenshot of create-new-URL page"](https://github.com/mcken-vince/tinyapp/blob/master/docs/urls-new-page.png)
 
 ## Dependencies
 
