@@ -30,7 +30,7 @@ const propSearch = (property, condition, database) => {
 };
 
 /**
- * 
+ * Finds url by shortURL property
  * @param {*string } url 
  * @param {*array of objects} urlDatabase 
  * @returns object from urlDatabase if object.shortURL === url. Otherwise returns false.
@@ -46,7 +46,7 @@ const urlSearch = (url, urlDatabase) => {
 
 
 /**
- * 
+ * Finds all urls corresponding to given user_id
  * @param {*string } user_id 
  * @param {*array of objects } urlDatabase 
  * @returns an array populated with all of the url objects created by that user
