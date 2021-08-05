@@ -21,13 +21,20 @@
     <div class="card-footer">
         <h4 class="card-title">Edit</h4>
         <form class="form-inline col-med" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
-        
           <label for="longURL">New URL:</label>
           <input class="form-control" type="text" name="longURL" placeholder="<%= longURL %>" style="width: 300px; margin: 1em">
           <button type="submit" class="btn btn-primary">Submit</button>
-  
       </form>
     </div>
+    <div class="container">
+      <ul>
+      <% for (const visit of visits) { %>
+        <li><%= visit.key %> clicked at <%= visit.time %></li>
+      <% } %>
+      </ul>
+      </div>
+
+
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

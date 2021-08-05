@@ -78,14 +78,25 @@ app.get("/u/:shortURL", (req, res) => {
     const thisURL = urlDatabase[url];
     const longURL = thisURL.longURL;
     thisURL.totalVisits += 1;
-    // if this click is a new visitor
-    if (!thisURL.uniqueVisitors.includes(req.session.visitor)) {
-      const newVisitor = generateRandomString();
-      req.session.visitor = newVisitor;
-      thisURL.uniqueVisitors.push(newVisitor);
-      thisURL.uniqueClicks += 1;
+    let visitorKey;
+    const time = new Date();
+    // check if this person has visited before
+    let newVisitor = true;
+    for (let visit of thisURL.visits) {
+      if (visit.key === req.session.visitor) {
+        newVisitor = false;
+      }
     }
-
+    // if visitor is new, create new key set cookie, and +1 uniqueClicks
+    if (newVisitor) {
+      visitorKey = generateRandomString();
+      req.session.visitor = visitorKey;
+      thisURL.uniqueClicks += 1;
+    } else {
+      visitorKey = req.session.visitor;
+    }
+    // add visit to list people who have clicked this link    
+    thisURL.visits.push( { key: visitorKey, time: time });
     res.redirect(longURL);
   } else {
     res.send("Inconceivable! Resource may have been deleted by user.").sendStatus(404);
@@ -121,7 +132,7 @@ app.post("/urls", (req, res) => {
   if (users[userId]) {
     const created = new Date();
     // add new URL to urlDatabase, so that anyone can use the links
-    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL, totalVisits: 0, uniqueVisitors: [], uniqueClicks: 0 });
+    urlDatabase.push({ userId, created, shortURL: newKey, longURL: req.body.longURL, totalVisits: 0, visits: [], uniqueClicks: 0 });
     // Redirect to newly generated url
     res.redirect(`/urls/${newKey}`);
   } else {
