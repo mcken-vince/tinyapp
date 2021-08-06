@@ -4,6 +4,7 @@ const cookieSession = require('cookie-session');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
 const { generateRandomString, getUserByProp, getIndexOfUrl, getMyUrls } = require('./helpers');
+const { users, urlDatabase } = require('./database');
 const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080; // default port 8080
@@ -18,15 +19,6 @@ app.use(cookieSession({
   keys: ['ar0q5%23GHno@l', 'N7fhssla;210**Ty']
 }));
 app.use(bodyParser.urlencoded({extended: true}));
-
-const users = {
-
-};
-
-// stores all urls created with tinyApp
-const urlDatabase = [
-
-];
 
 app.get("/", (req, res) => {
   res.redirect("/login");
