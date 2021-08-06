@@ -29,7 +29,7 @@ const urlDatabase = [
 ];
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.get("/urls", (req, res) => {
